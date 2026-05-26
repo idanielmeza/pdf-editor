@@ -7,6 +7,8 @@ import TableElement from './TableElement'
 import DrawingElementComp from './DrawingElementComp'
 import DrawingCanvas from './DrawingCanvas'
 import EraserCanvas from './EraserCanvas'
+import HighlightCanvas from './HighlightCanvas'
+import HighlightElementComp from './HighlightElementComp'
 
 export default function EditOverlay() {
   const elements = usePdfStore((s) => s.elements)
@@ -20,6 +22,8 @@ export default function EditOverlay() {
   const drawSize = usePdfStore((s) => s.drawSize)
   const eraserSize = usePdfStore((s) => s.eraserSize)
   const eraserColor = usePdfStore((s) => s.eraserColor)
+  const highlightColor = usePdfStore((s) => s.highlightColor)
+  const highlightOpacity = usePdfStore((s) => s.highlightOpacity)
   const mouseDownPos = useRef<{ x: number; y: number } | null>(null)
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
@@ -53,12 +57,13 @@ export default function EditOverlay() {
       style={{
         position: 'absolute', top: 0, left: 0,
         width: viewportRef?.width, height: viewportRef?.height,
-        pointerEvents: (activeTool === 'text' || activeTool === 'draw' || activeTool === 'eraser') ? 'auto' : 'none',
+        pointerEvents: (activeTool === 'text' || activeTool === 'draw' || activeTool === 'eraser' || activeTool === 'highlight') ? 'auto' : 'none',
       }}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
     >
       {pageElements.map((el) => {
+        if (el.type === 'highlight') return <HighlightElementComp key={el.id} element={el} />
         if (el.type === 'text') return <TextElement key={el.id} element={el} />
         if (el.type === 'image') return <ImageElement key={el.id} element={el} />
         if (el.type === 'shape') return <ShapeElement key={el.id} element={el} />
@@ -74,6 +79,15 @@ export default function EditOverlay() {
           color={drawColor}
           size={drawSize}
           onCommit={() => setActiveTool(null)}
+        />
+      )}
+
+      {activeTool === 'highlight' && viewportRef && (
+        <HighlightCanvas
+          width={viewportRef.width}
+          height={viewportRef.height}
+          color={highlightColor}
+          opacity={highlightOpacity}
         />
       )}
 

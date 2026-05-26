@@ -30,10 +30,14 @@ interface PdfStore {
   drawSize: number
   eraserSize: number
   eraserColor: string
+  highlightColor: string
+  highlightOpacity: number
   setDrawColor: (c: string) => void
   setDrawSize: (s: number) => void
   setEraserSize: (s: number) => void
   setEraserColor: (c: string) => void
+  setHighlightColor: (c: string) => void
+  setHighlightOpacity: (o: number) => void
 
   loadPdf: (file: File) => Promise<void>
   savePdf: () => Promise<void>
@@ -77,10 +81,14 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
   drawSize: 3,
   eraserSize: 20,
   eraserColor: '#ffffff',
+  highlightColor: '#ffff00',
+  highlightOpacity: 0.4,
   setDrawColor: (c) => set({ drawColor: c }),
   setDrawSize: (s) => set({ drawSize: s }),
   setEraserSize: (s) => set({ eraserSize: s }),
   setEraserColor: (c) => set({ eraserColor: c }),
+  setHighlightColor: (c) => set({ highlightColor: c }),
+  setHighlightOpacity: (o) => set({ highlightOpacity: o }),
   activeTool: null,
   ocrData: {},
   ocrProgress: 0,

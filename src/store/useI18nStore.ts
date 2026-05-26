@@ -93,6 +93,7 @@ const translations: Record<Lang, Record<string, string>> = {
     undo: 'Deshacer',
     redo: 'Rehacer',
     eraser: 'Borrador',
+    highlight: 'Subrayar',
   },
   en: {
     open: 'Open',
@@ -184,6 +185,7 @@ const translations: Record<Lang, Record<string, string>> = {
     undo: 'Undo',
     redo: 'Redo',
     eraser: 'Eraser',
+    highlight: 'Highlight',
   },
 }
 

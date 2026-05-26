@@ -1,7 +1,7 @@
 import type { PDFDocumentProxy, PageViewport } from 'pdfjs-dist'
 import type { PDFDocument } from 'pdf-lib'
 
-export type ToolName = 'text' | 'crop' | 'draw' | 'eraser' | null
+export type ToolName = 'text' | 'crop' | 'draw' | 'eraser' | 'highlight' | null
 
 export interface TextElement {
   type: 'text'
@@ -65,7 +65,18 @@ export interface DrawingElement {
   eraser?: boolean
 }
 
-export type OverlayElement = TextElement | ImageElement | ShapeElement | TableElement | DrawingElement
+export interface HighlightElement {
+  type: 'highlight'
+  id: string
+  x: number
+  y: number
+  w: number
+  h: number
+  color: string   // hex color
+  opacity: number // 0-1
+}
+
+export type OverlayElement = TextElement | ImageElement | ShapeElement | TableElement | DrawingElement | HighlightElement
 
 export interface OcrLine {
   text: string

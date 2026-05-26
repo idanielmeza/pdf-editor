@@ -75,6 +75,16 @@ export async function savePdfWithOverlays(
           font,
           color: rgb(r, g, b),
         })
+      } else if (el.type === 'highlight') {
+        const { r, g, b } = hexToRgb(el.color)
+        page.drawRectangle({
+          x: el.x / scale,
+          y: height - (el.y + el.h) / scale,
+          width: el.w / scale,
+          height: el.h / scale,
+          color: rgb(r, g, b),
+          opacity: el.opacity,
+        })
       } else if (el.type === 'image' || el.type === 'drawing') {
         const imgBytes = await fetch(el.src).then((r) => r.arrayBuffer())
         const isPng = el.src.startsWith('data:image/png') || (!el.src.startsWith('data:image/jp') && el.src.includes('png'))
@@ -93,7 +103,7 @@ export async function savePdfWithOverlays(
     }
   }
 
-  const bytes = await doc.save()
+  const bytes = await doc.save({ useObjectStreams: false })
   const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/pdf' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

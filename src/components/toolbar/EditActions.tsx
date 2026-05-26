@@ -23,10 +23,14 @@ export default function EditActions() {
   const drawSize = usePdfStore((s) => s.drawSize)
   const eraserSize = usePdfStore((s) => s.eraserSize)
   const eraserColor = usePdfStore((s) => s.eraserColor)
+  const highlightColor = usePdfStore((s) => s.highlightColor)
+  const highlightOpacity = usePdfStore((s) => s.highlightOpacity)
   const setDrawColor = usePdfStore((s) => s.setDrawColor)
   const setDrawSize = usePdfStore((s) => s.setDrawSize)
   const setEraserSize = usePdfStore((s) => s.setEraserSize)
   const setEraserColor = usePdfStore((s) => s.setEraserColor)
+  const setHighlightColor = usePdfStore((s) => s.setHighlightColor)
+  const setHighlightOpacity = usePdfStore((s) => s.setHighlightOpacity)
   const [showReplace, setShowReplace] = useState(false)
   const [showTableConfig, setShowTableConfig] = useState(false)
   const [showSignature, setShowSignature] = useState(false)
@@ -35,6 +39,7 @@ export default function EditActions() {
   function toggleText() { setActiveTool(activeTool === 'text' ? null : 'text') }
   function toggleDraw() { setActiveTool(activeTool === 'draw' ? null : 'draw') }
   function toggleEraser() { setActiveTool(activeTool === 'eraser' ? null : 'eraser') }
+  function toggleHighlight() { setActiveTool(activeTool === 'highlight' ? null : 'highlight') }
 
   function handleImgSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -127,6 +132,26 @@ export default function EditActions() {
             <input type="range" min={5} max={80} value={eraserSize} title="Tamaño del borrador"
               style={{ width: 70, accentColor: 'var(--accent-primary)' }}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setEraserSize(parseInt(e.target.value))}
+            />
+          </>
+        )}
+        <button
+          className={`btn ${activeTool === 'highlight' ? 'active' : ''}`}
+          title="Subrayar / resaltar texto"
+          onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); toggleHighlight() }}
+          disabled={!pdfDoc}
+        >
+          <i className="fas fa-highlighter" /> {tHook('highlight') ?? 'Subrayar'}
+        </button>
+        {activeTool === 'highlight' && (
+          <>
+            <input type="color" value={highlightColor} title="Color de resaltado"
+              style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setHighlightColor(e.target.value)}
+            />
+            <input type="range" min={10} max={100} value={Math.round(highlightOpacity * 100)} title="Opacidad"
+              style={{ width: 60, accentColor: 'var(--accent-primary)' }}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setHighlightOpacity(parseInt(e.target.value) / 100)}
             />
           </>
         )}
