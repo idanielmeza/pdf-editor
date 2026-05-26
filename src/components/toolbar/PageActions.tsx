@@ -6,15 +6,25 @@ export default function PageActions() {
   const addPage = usePdfStore((s) => s.addPage)
   const duplicatePage = usePdfStore((s) => s.duplicatePage)
   const deletePage = usePdfStore((s) => s.deletePage)
+  const rotateCurrentPage = usePdfStore((s) => s.rotateCurrentPage)
   const currentPage = usePdfStore((s) => s.currentPage)
   const pdfDoc = usePdfStore((s) => s.pdfDoc)
   const { t } = useI18nStore()
 
   return (
     <ToolbarGroup>
-      <button className="btn" title="Agregar página en blanco al final" onClick={addPage} disabled={!pdfDoc}><i className="fas fa-plus" /> {t('page')}</button>
-      <button className="btn" title="Duplicar página actual" onClick={duplicatePage} disabled={!pdfDoc}><i className="fas fa-copy" /> {t('duplicate')}</button>
-      <button className="btn danger" title="Eliminar página actual (irreversible)" onClick={() => deletePage(currentPage)} disabled={!pdfDoc}><i className="fas fa-trash" /> {t('delete')}</button>
+      <button className="btn" title="Agregar página en blanco al final" onClick={addPage} disabled={!pdfDoc}>
+        <i className="fas fa-plus" /> {t('page')}
+      </button>
+      <button className="btn" title="Duplicar página actual" onClick={duplicatePage} disabled={!pdfDoc}>
+        <i className="fas fa-copy" /> {t('duplicate')}
+      </button>
+      <button className="btn" title="Rotar página actual 90°" onClick={rotateCurrentPage} disabled={!pdfDoc}>
+        <i className="fas fa-sync-alt" /> {t('rotate')}
+      </button>
+      <button className="btn danger" title="Eliminar página actual" onClick={() => deletePage(currentPage)} disabled={!pdfDoc}>
+        <i className="fas fa-trash" /> {t('delete')}
+      </button>
     </ToolbarGroup>
   )
 }

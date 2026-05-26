@@ -673,22 +673,23 @@ body {
   .properties-panel { display: none; }
 
   .editor-area {
-    padding: 0.5rem 0;
+    padding: 0;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     display: flex;
     justify-content: center;
     align-items: flex-start;
+    background: #333;
   }
 
   .page-wrapper {
-    transform-origin: top center;
     max-width: 100%;
+    margin: 0 auto;
   }
 
   #pdf-canvas {
+    display: block;
     max-width: 100%;
-    height: auto;
   }
 
   .btn {

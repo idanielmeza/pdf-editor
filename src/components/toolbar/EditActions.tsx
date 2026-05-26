@@ -36,6 +36,8 @@ export default function EditActions() {
   const [showSignature, setShowSignature] = useState(false)
   const { t: tHook } = useI18nStore()
 
+  const need = (fn: () => void) => () => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); fn() }
+
   function toggleText() { setActiveTool(activeTool === 'text' ? null : 'text') }
   function toggleDraw() { setActiveTool(activeTool === 'draw' ? null : 'draw') }
   function toggleEraser() { setActiveTool(activeTool === 'eraser' ? null : 'eraser') }
@@ -78,74 +80,79 @@ export default function EditActions() {
 
   return (
     <>
+      {/* Group 1: Insert / annotate */}
       <ToolbarGroup>
         <input ref={imgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImgSelect} />
-        <button className={`btn ${activeTool === 'text' ? 'active' : ''}`} title="Activar herramienta de texto — clic en página para agregar texto" onClick={toggleText}>
+        <button className={`btn ${activeTool === 'text' ? 'active' : ''}`} title="Agregar texto" onClick={toggleText}>
           <i className="fas fa-font" /> {tHook('text')}
         </button>
-        <button className="btn" title="Insertar imagen en la página actual" onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); imgRef.current?.click() }}>
+        <button className="btn" title="Insertar imagen" onClick={need(() => imgRef.current?.click())}>
           <i className="fas fa-image" /> {tHook('image')}
         </button>
-        <button className="btn" title="Ejecutar OCR para detectar texto en PDFs escaneados" onClick={handleOcr}>
-          <i className="fas fa-microscope" /> {tHook('ocr')}
-        </button>
-        <button className="btn" title="Buscar y reemplazar texto en la página actual" onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); setShowReplace(true) }}>
-          <i className="fas fa-exchange-alt" /> {tHook('replace')}
-        </button>
-        <button className="btn" title="Insertar firma dibujada o desde imagen" onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); setShowSignature(true) }}>
+        <button className="btn" title="Insertar firma" onClick={need(() => setShowSignature(true))}>
           <i className="fas fa-signature" /> {tHook('signature')}
         </button>
+        <button className="btn" title="Buscar y reemplazar texto" onClick={need(() => setShowReplace(true))}>
+          <i className="fas fa-exchange-alt" /> {tHook('replace')}
+        </button>
+        <button className="btn" title="OCR — detectar texto en PDF escaneado" onClick={handleOcr}>
+          <i className="fas fa-microscope" /> {tHook('ocr')}
+        </button>
+      </ToolbarGroup>
+
+      {/* Group 2: Draw / erase / highlight */}
+      <ToolbarGroup>
         <button
           className={`btn ${activeTool === 'draw' ? 'active' : ''}`}
-          title="Dibujar a mano alzada sobre la página"
-          onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); toggleDraw() }}
+          title="Dibujar a mano alzada"
+          onClick={need(toggleDraw)}
           disabled={!pdfDoc}
         >
-          <i className="fas fa-pencil-alt" /> {tHook('draw') ?? 'Borrador'}
+          <i className="fas fa-pencil-alt" /> {tHook('draw')}
         </button>
         {activeTool === 'draw' && (
           <>
-            <input type="color" value={drawColor} title="Color del lápiz"
+            <input type="color" value={drawColor} title="Color"
               style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setDrawColor(e.target.value)}
             />
-            <input type="range" min={1} max={30} value={drawSize} title="Grosor del lápiz"
-              style={{ width: 70, accentColor: 'var(--accent-primary)' }}
+            <input type="range" min={1} max={30} value={drawSize} title="Grosor"
+              style={{ width: 60, accentColor: 'var(--accent-primary)' }}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setDrawSize(parseInt(e.target.value))}
             />
           </>
         )}
         <button
           className={`btn ${activeTool === 'eraser' ? 'active' : ''}`}
-          title="Borrar contenido del PDF (pinta de blanco)"
-          onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); toggleEraser() }}
+          title="Borrador — cubre contenido del PDF"
+          onClick={need(toggleEraser)}
           disabled={!pdfDoc}
         >
-          <i className="fas fa-eraser" /> {tHook('eraser') ?? 'Borrador'}
+          <i className="fas fa-eraser" /> {tHook('eraser')}
         </button>
         {activeTool === 'eraser' && (
           <>
-            <input type="color" value={eraserColor} title="Color del borrador"
+            <input type="color" value={eraserColor} title="Color"
               style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setEraserColor(e.target.value)}
             />
-            <input type="range" min={5} max={80} value={eraserSize} title="Tamaño del borrador"
-              style={{ width: 70, accentColor: 'var(--accent-primary)' }}
+            <input type="range" min={5} max={80} value={eraserSize} title="Tamaño"
+              style={{ width: 60, accentColor: 'var(--accent-primary)' }}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setEraserSize(parseInt(e.target.value))}
             />
           </>
         )}
         <button
           className={`btn ${activeTool === 'highlight' ? 'active' : ''}`}
-          title="Subrayar / resaltar texto"
-          onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); toggleHighlight() }}
+          title="Resaltar / subrayar"
+          onClick={need(toggleHighlight)}
           disabled={!pdfDoc}
         >
-          <i className="fas fa-highlighter" /> {tHook('highlight') ?? 'Subrayar'}
+          <i className="fas fa-highlighter" /> {tHook('highlight')}
         </button>
         {activeTool === 'highlight' && (
           <>
-            <input type="color" value={highlightColor} title="Color de resaltado"
+            <input type="color" value={highlightColor} title="Color"
               style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setHighlightColor(e.target.value)}
             />
@@ -156,23 +163,18 @@ export default function EditActions() {
           </>
         )}
       </ToolbarGroup>
+
+      {/* Group 3: Shapes */}
       <ToolbarGroup>
-        <button className="btn" onClick={() => addShape('rect')} disabled={!pdfDoc} title="Rectángulo">
-          <i className="fas fa-square" />
-        </button>
-        <button className="btn" onClick={() => addShape('circle')} disabled={!pdfDoc} title="Círculo">
-          <i className="fas fa-circle" />
-        </button>
-        <button className="btn" onClick={() => addShape('line')} disabled={!pdfDoc} title="Línea">
-          <i className="fas fa-minus" />
-        </button>
-        <button className="btn" onClick={() => addShape('arrow')} disabled={!pdfDoc} title="Flecha">
-          <i className="fas fa-arrow-right" />
-        </button>
-        <button className="btn" onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); setShowTableConfig(true) }} disabled={!pdfDoc} title="Insertar tabla con filas y columnas personalizadas">
+        <button className="btn" onClick={() => addShape('rect')} disabled={!pdfDoc} title="Rectángulo"><i className="fas fa-square" /></button>
+        <button className="btn" onClick={() => addShape('circle')} disabled={!pdfDoc} title="Círculo"><i className="fas fa-circle" /></button>
+        <button className="btn" onClick={() => addShape('line')} disabled={!pdfDoc} title="Línea"><i className="fas fa-minus" /></button>
+        <button className="btn" onClick={() => addShape('arrow')} disabled={!pdfDoc} title="Flecha"><i className="fas fa-arrow-right" /></button>
+        <button className="btn" onClick={need(() => setShowTableConfig(true))} disabled={!pdfDoc} title="Insertar tabla">
           <i className="fas fa-table" /> {tHook('table')}
         </button>
       </ToolbarGroup>
+
       {showReplace && <ReplaceTextModal onClose={() => setShowReplace(false)} />}
       {showSignature && <SignatureModal onClose={() => setShowSignature(false)} />}
       {showTableConfig && (
