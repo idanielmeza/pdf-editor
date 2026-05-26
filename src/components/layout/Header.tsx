@@ -1,4 +1,5 @@
 import Toolbar from '../toolbar/Toolbar'
+import MobileMenuButton from '../toolbar/MobileMenuButton'
 import { useI18nStore } from '../../store/useI18nStore'
 import { useThemeStore } from '../../store/useThemeStore'
 import InstallPwaButton from '../ui/InstallPwaButton'
@@ -16,7 +17,13 @@ export default function Header() {
           <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textAlign: 'right', marginTop: 1 }}>by LedezmaDev</span>
         </div>
       </div>
-      <Toolbar />
+
+      {/* Desktop toolbar */}
+      <div className="toolbar-desktop">
+        <Toolbar />
+      </div>
+
+      {/* Right controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginLeft: 'auto', flexShrink: 0 }}>
         <InstallPwaButton />
         <button
@@ -38,6 +45,10 @@ export default function Header() {
             ? <i className="fas fa-sun" />
             : <i className="fas fa-moon" />}
         </button>
+        {/* Mobile hamburger */}
+        <div className="toolbar-mobile">
+          <MobileMenuButton />
+        </div>
       </div>
     </header>
   )
