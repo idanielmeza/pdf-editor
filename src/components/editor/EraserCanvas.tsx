@@ -85,7 +85,6 @@ export default function EraserCanvas({ width, height, size, color }: Props) {
         x: 0, y: 0, w: width, h: height, src, eraser: true,
       }
       addElement(el)
-      // Clear canvas for next stroke
       const ctx = canvas.getContext('2d')!
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       hasStrokes.current = false

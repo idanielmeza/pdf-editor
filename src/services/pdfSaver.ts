@@ -1,6 +1,23 @@
 import { PDFDocument, StandardFonts, rgb, degrees, PDFName, PDFBool } from 'pdf-lib'
 import type { OverlayElement } from '../types'
 
+function flipImageVertically(dataUrl: string, w: number, h: number): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')!
+      ctx.translate(0, h)
+      ctx.scale(1, -1)
+      ctx.drawImage(img, 0, 0, w, h)
+      resolve(canvas.toDataURL('image/png'))
+    }
+    img.src = dataUrl
+  })
+}
+
 function hexToRgb(hex: string) {
   const h = hex.replace('#', '')
   return {
@@ -94,8 +111,14 @@ export async function savePdfWithOverlays(
           opacity: el.opacity,
         })
       } else if (el.type === 'image' || el.type === 'drawing') {
-        const imgBytes = await fetch(el.src).then((r) => r.arrayBuffer())
-        const isPng = el.src.startsWith('data:image/png') || (!el.src.startsWith('data:image/jp') && el.src.includes('png'))
+        // For drawing/eraser elements stored as data URLs, flip vertically via canvas
+        // because canvas Y=0 is top but PDF Y=0 is bottom
+        let srcUrl = el.src
+        if (el.type === 'drawing') {
+          srcUrl = await flipImageVertically(el.src, el.w, el.h)
+        }
+        const imgBytes = await fetch(srcUrl).then((r) => r.arrayBuffer())
+        const isPng = srcUrl.startsWith('data:image/png') || (!srcUrl.startsWith('data:image/jp') && srcUrl.includes('png'))
         const img = isPng
           ? await doc.embedPng(imgBytes)
           : await doc.embedJpg(imgBytes)
