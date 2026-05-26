@@ -680,6 +680,7 @@ body {
     justify-content: center;
     align-items: flex-start;
     background: #333;
+    touch-action: pan-x pan-y;
   }
 
   .page-wrapper {
