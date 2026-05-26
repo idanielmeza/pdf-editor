@@ -92,6 +92,7 @@ const translations: Record<Lang, Record<string, string>> = {
     ocrStarting: 'Iniciando...',
     undo: 'Deshacer',
     redo: 'Rehacer',
+    eraser: 'Borrador',
   },
   en: {
     open: 'Open',
@@ -182,6 +183,7 @@ const translations: Record<Lang, Record<string, string>> = {
     ocrStarting: 'Starting...',
     undo: 'Undo',
     redo: 'Redo',
+    eraser: 'Eraser',
   },
 }
 

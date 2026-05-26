@@ -21,8 +21,10 @@ export default function EditActions() {
   const viewportRef = usePdfStore((s) => s.viewportRef)
   const drawColor = usePdfStore((s) => s.drawColor)
   const drawSize = usePdfStore((s) => s.drawSize)
+  const eraserSize = usePdfStore((s) => s.eraserSize)
   const setDrawColor = usePdfStore((s) => s.setDrawColor)
   const setDrawSize = usePdfStore((s) => s.setDrawSize)
+  const setEraserSize = usePdfStore((s) => s.setEraserSize)
   const [showReplace, setShowReplace] = useState(false)
   const [showTableConfig, setShowTableConfig] = useState(false)
   const [showSignature, setShowSignature] = useState(false)
@@ -30,6 +32,7 @@ export default function EditActions() {
 
   function toggleText() { setActiveTool(activeTool === 'text' ? null : 'text') }
   function toggleDraw() { setActiveTool(activeTool === 'draw' ? null : 'draw') }
+  function toggleEraser() { setActiveTool(activeTool === 'eraser' ? null : 'eraser') }
 
   function handleImgSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -95,15 +98,29 @@ export default function EditActions() {
         </button>
         {activeTool === 'draw' && (
           <>
-            <input type="color" value={drawColor} title="Color del borrador"
+            <input type="color" value={drawColor} title="Color del lápiz"
               style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setDrawColor(e.target.value)}
             />
-            <input type="range" min={1} max={30} value={drawSize} title="Grosor del borrador"
+            <input type="range" min={1} max={30} value={drawSize} title="Grosor del lápiz"
               style={{ width: 70, accentColor: 'var(--accent-primary)' }}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setDrawSize(parseInt(e.target.value))}
             />
           </>
+        )}
+        <button
+          className={`btn ${activeTool === 'eraser' ? 'active' : ''}`}
+          title="Borrar contenido del PDF (pinta de blanco)"
+          onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); toggleEraser() }}
+          disabled={!pdfDoc}
+        >
+          <i className="fas fa-eraser" /> {tHook('eraser') ?? 'Borrador'}
+        </button>
+        {activeTool === 'eraser' && (
+          <input type="range" min={5} max={80} value={eraserSize} title="Tamaño del borrador"
+            style={{ width: 70, accentColor: 'var(--accent-primary)' }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setEraserSize(parseInt(e.target.value))}
+          />
         )}
       </ToolbarGroup>
       <ToolbarGroup>

@@ -21,7 +21,11 @@ export function useResize(id: string) {
           h: Math.max(50, origH + (e2.clientY - startY)),
         })
       }
-      const onUp = () => {
+      const onUp = (e2: MouseEvent) => {
+        updateElement(id, {
+          w: Math.max(50, origW + (e2.clientX - startX)),
+          h: Math.max(50, origH + (e2.clientY - startY)),
+        }, true)
         document.removeEventListener('mousemove', onMove)
         document.removeEventListener('mouseup', onUp)
       }

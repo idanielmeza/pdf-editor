@@ -43,7 +43,7 @@ export default function TextElement({ element }: { element: TEl }) {
   function handleBlur() {
     isEditing.current = false
     if (divRef.current) {
-      updateElement(element.id, { content: divRef.current.textContent ?? '' })
+      updateElement(element.id, { content: divRef.current.textContent ?? '' }, true)
     }
   }
 

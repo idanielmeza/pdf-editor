@@ -28,8 +28,10 @@ interface PdfStore {
   viewportRef: { width: number; height: number } | null
   drawColor: string
   drawSize: number
+  eraserSize: number
   setDrawColor: (c: string) => void
   setDrawSize: (s: number) => void
+  setEraserSize: (s: number) => void
 
   loadPdf: (file: File) => Promise<void>
   savePdf: () => Promise<void>
@@ -37,7 +39,7 @@ interface PdfStore {
   goToPage: (n: number) => void
   setZoom: (z: number) => void
   addElement: (el: OverlayElement) => void
-  updateElement: (id: string, patch: Partial<OverlayElement>) => void
+  updateElement: (id: string, patch: Partial<OverlayElement>, pushToHistory?: boolean) => void
   deleteElement: (id: string) => void
   selectElement: (id: string | null) => void
   setActiveTool: (tool: ToolName) => void
@@ -71,8 +73,10 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
   selectedId: null,
   drawColor: '#000000',
   drawSize: 3,
+  eraserSize: 20,
   setDrawColor: (c) => set({ drawColor: c }),
   setDrawSize: (s) => set({ drawSize: s }),
+  setEraserSize: (s) => set({ eraserSize: s }),
   activeTool: null,
   ocrData: {},
   ocrProgress: 0,
@@ -138,7 +142,7 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
     set({ elements: next })
   },
 
-  updateElement: (id, patch) => {
+  updateElement: (id, patch, pushToHistory = false) => {
     const { elements, currentPage } = get()
     const next = {
       ...elements,
@@ -146,6 +150,7 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
         el.id === id ? ({ ...el, ...patch } as OverlayElement) : el
       ),
     }
+    if (pushToHistory) get().pushHistory(next)
     set({ elements: next })
   },
 

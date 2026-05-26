@@ -1,7 +1,7 @@
 import type { PDFDocumentProxy, PageViewport } from 'pdfjs-dist'
 import type { PDFDocument } from 'pdf-lib'
 
-export type ToolName = 'text' | 'crop' | 'draw' | null
+export type ToolName = 'text' | 'crop' | 'draw' | 'eraser' | null
 
 export interface TextElement {
   type: 'text'

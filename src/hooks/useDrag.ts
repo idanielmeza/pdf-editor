@@ -17,7 +17,8 @@ export function useDrag(id: string) {
       const onMove = (e2: MouseEvent) => {
         updateElement(id, { x: origX + (e2.clientX - startX), y: origY + (e2.clientY - startY) })
       }
-      const onUp = () => {
+      const onUp = (e2: MouseEvent) => {
+        updateElement(id, { x: origX + (e2.clientX - startX), y: origY + (e2.clientY - startY) }, true)
         document.removeEventListener('mousemove', onMove)
         document.removeEventListener('mouseup', onUp)
       }

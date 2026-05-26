@@ -6,6 +6,7 @@ import ShapeElement from './ShapeElement'
 import TableElement from './TableElement'
 import DrawingElementComp from './DrawingElementComp'
 import DrawingCanvas from './DrawingCanvas'
+import EraserCanvas from './EraserCanvas'
 
 export default function EditOverlay() {
   const elements = usePdfStore((s) => s.elements)
@@ -17,6 +18,7 @@ export default function EditOverlay() {
   const viewportRef = usePdfStore((s) => s.viewportRef)
   const drawColor = usePdfStore((s) => s.drawColor)
   const drawSize = usePdfStore((s) => s.drawSize)
+  const eraserSize = usePdfStore((s) => s.eraserSize)
   const mouseDownPos = useRef<{ x: number; y: number } | null>(null)
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
@@ -50,7 +52,7 @@ export default function EditOverlay() {
       style={{
         position: 'absolute', top: 0, left: 0,
         width: viewportRef?.width, height: viewportRef?.height,
-        pointerEvents: (activeTool === 'text' || activeTool === 'draw') ? 'auto' : 'none',
+        pointerEvents: (activeTool === 'text' || activeTool === 'draw' || activeTool === 'eraser') ? 'auto' : 'none',
       }}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
@@ -71,6 +73,14 @@ export default function EditOverlay() {
           color={drawColor}
           size={drawSize}
           onCommit={() => setActiveTool(null)}
+        />
+      )}
+
+      {activeTool === 'eraser' && viewportRef && (
+        <EraserCanvas
+          width={viewportRef.width}
+          height={viewportRef.height}
+          size={eraserSize}
         />
       )}
     </div>
