@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react'
 
 export default function InstallPwaButton() {
-  const [prompt, setPrompt] = useState<any>(null)
+  const [prompt, setPrompt] = useState<any>(() => (window as any).__pwaInstallPrompt ?? null)
   const [installed, setInstalled] = useState(false)
 
   useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault()
-      setPrompt(e)
+    // Pick up prompt if already captured before mount
+    if ((window as any).__pwaInstallPrompt) {
+      setPrompt((window as any).__pwaInstallPrompt)
     }
-    window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', () => setInstalled(true))
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+
+    const onReady = () => setPrompt((window as any).__pwaInstallPrompt)
+    const onInstalled = () => { setInstalled(true); setPrompt(null) }
+
+    window.addEventListener('pwaPromptReady', onReady)
+    window.addEventListener('appinstalled', onInstalled)
+    return () => {
+      window.removeEventListener('pwaPromptReady', onReady)
+      window.removeEventListener('appinstalled', onInstalled)
+    }
   }, [])
 
   if (installed || !prompt) return null
@@ -20,6 +27,7 @@ export default function InstallPwaButton() {
     prompt.prompt()
     const { outcome } = await prompt.userChoice
     if (outcome === 'accepted') setInstalled(true)
+    ;(window as any).__pwaInstallPrompt = null
     setPrompt(null)
   }
 
@@ -28,7 +36,6 @@ export default function InstallPwaButton() {
       className="btn primary"
       title="Instalar como aplicación"
       onClick={install}
-      style={{ gap: 6 }}
     >
       <i className="fas fa-download" /> Instalar App
     </button>
