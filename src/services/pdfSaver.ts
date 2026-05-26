@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib'
+import { PDFDocument, StandardFonts, rgb, degrees, PDFName, PDFArray, PDFDict } from 'pdf-lib'
 import type { OverlayElement } from '../types'
 
 function hexToRgb(hex: string) {
@@ -19,17 +19,28 @@ export async function savePdfWithOverlays(
 ): Promise<void> {
   const doc = await PDFDocument.load(pdfBytes)
 
-  // Remove AcroForm fields (PDF form widgets) so they don't appear in export
-  const catalog = doc.catalog
-  if (catalog.has(catalog.context.obj('AcroForm') as any)) {
-    catalog.delete(catalog.context.obj('AcroForm') as any)
-  }
+  // Remove AcroForm + all widget annotations from every page
   try {
     const form = doc.getForm()
     form.flatten()
-  } catch { /* no form fields */ }
-
+  } catch { /* no form */ }
+  doc.catalog.delete(PDFName.of('AcroForm'))
   const pages = doc.getPages()
+  for (const page of pages) {
+    const annots = page.node.get(PDFName.of('Annots'))
+    if (!annots) continue
+    const arr = doc.context.lookupMaybe(annots, PDFArray)
+    if (!arr) continue
+    const filtered: any[] = []
+    for (let i = 0; i < arr.size(); i++) {
+      const ref = arr.get(i)
+      const annot = doc.context.lookupMaybe(ref, PDFDict)
+      const subtype = annot?.get(PDFName.of('Subtype'))
+      // Keep non-Widget annotations (links, stamps, etc); drop form widgets
+      if (!subtype || subtype.toString() !== '/Widget') filtered.push(ref)
+    }
+    page.node.set(PDFName.of('Annots'), doc.context.obj(filtered))
+  }
   const font = await doc.embedFont(StandardFonts.Helvetica)
   const scale = 1.5 * zoom
 
