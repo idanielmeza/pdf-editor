@@ -54,6 +54,13 @@ export interface TableElement {
   fontSize: number
 }
 
+export interface EraserStroke {
+  x: number
+  y: number
+  r: number   // radius
+  color: string
+}
+
 export interface DrawingElement {
   type: 'drawing'
   id: string
@@ -63,6 +70,7 @@ export interface DrawingElement {
   h: number
   src: string  // data URL of the drawing canvas
   eraser?: boolean
+  eraserStrokes?: EraserStroke[]  // for PDF export: replay as solid shapes
 }
 
 export interface HighlightElement {

@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { usePdfStore } from '../../store/usePdfStore'
 import { useI18nStore } from '../../store/useI18nStore'
-import type { DrawingElement } from '../../types'
+import type { DrawingElement, EraserStroke } from '../../types'
 
 interface Props {
   width: number
@@ -18,6 +18,7 @@ export default function EraserCanvas({ width, height, size, color }: Props) {
   const erasing = useRef(false)
   const lastPos = useRef<{ x: number; y: number } | null>(null)
   const hasStrokes = useRef(false)
+  const strokeData = useRef<EraserStroke[]>([])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -25,6 +26,7 @@ export default function EraserCanvas({ width, height, size, color }: Props) {
     const ctx = canvas.getContext('2d')!
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     hasStrokes.current = false
+    strokeData.current = []
   }, [width, height])
 
   function getPos(e: React.MouseEvent | React.TouchEvent): { x: number; y: number } {
@@ -36,10 +38,11 @@ export default function EraserCanvas({ width, height, size, color }: Props) {
     return { x: (e as React.MouseEvent).clientX - rect.left, y: (e as React.MouseEvent).clientY - rect.top }
   }
 
-  function paintWhite(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  function paintCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.beginPath()
     ctx.arc(x, y, size / 2, 0, Math.PI * 2)
     ctx.fill()
+    strokeData.current.push({ x, y, r: size / 2, color })
   }
 
   function onStart(e: React.MouseEvent | React.TouchEvent) {
@@ -50,7 +53,7 @@ export default function EraserCanvas({ width, height, size, color }: Props) {
     erasing.current = true
     const pos = getPos(e)
     lastPos.current = pos
-    paintWhite(ctx, pos.x, pos.y)
+    paintCircle(ctx, pos.x, pos.y)
     hasStrokes.current = true
   }
 
@@ -66,7 +69,7 @@ export default function EraserCanvas({ width, height, size, color }: Props) {
     const steps = Math.max(1, Math.floor(dist / (size * 0.3)))
     for (let i = 1; i <= steps; i++) {
       const t = i / steps
-      paintWhite(ctx, last.x + (pos.x - last.x) * t, last.y + (pos.y - last.y) * t)
+      paintCircle(ctx, last.x + (pos.x - last.x) * t, last.y + (pos.y - last.y) * t)
     }
     lastPos.current = pos
   }
@@ -79,15 +82,21 @@ export default function EraserCanvas({ width, height, size, color }: Props) {
     // Commit current stroke as DrawingElement, keep canvas for more strokes
     if (hasStrokes.current) {
       const canvas = canvasRef.current!
+      // Export eraser as series of shapes instead of image for reliable PDF export
+      // Get pixel data to find painted regions — too heavy
+      // Instead: store stroke coords and replay in pdfSaver
+      // Simple approach: export stroke canvas as-is, pdfSaver handles eraser specially
       const src = canvas.toDataURL('image/png')
       const el: DrawingElement = {
         type: 'drawing', id: crypto.randomUUID(),
         x: 0, y: 0, w: width, h: height, src, eraser: true,
+        eraserStrokes: [...strokeData.current],
       }
       addElement(el)
       const ctx = canvas.getContext('2d')!
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       hasStrokes.current = false
+      strokeData.current = []
     }
   }
 
