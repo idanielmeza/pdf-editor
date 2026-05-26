@@ -18,6 +18,17 @@ export async function savePdfWithOverlays(
   zoom: number
 ): Promise<void> {
   const doc = await PDFDocument.load(pdfBytes)
+
+  // Remove AcroForm fields (PDF form widgets) so they don't appear in export
+  const catalog = doc.catalog
+  if (catalog.has(catalog.context.obj('AcroForm') as any)) {
+    catalog.delete(catalog.context.obj('AcroForm') as any)
+  }
+  try {
+    const form = doc.getForm()
+    form.flatten()
+  } catch { /* no form fields */ }
+
   const pages = doc.getPages()
   const font = await doc.embedFont(StandardFonts.Helvetica)
   const scale = 1.5 * zoom
