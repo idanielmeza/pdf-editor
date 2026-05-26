@@ -1,0 +1,26 @@
+{
+  "name": "pdf-editor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zustand": "^4.5.2",
+    "pdfjs-dist": "3.11.174",
+    "pdf-lib": "^1.17.1",
+    "tesseract.js": "^5.0.4",
+    "docx": "^8.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.1.0"
+  }
+}
