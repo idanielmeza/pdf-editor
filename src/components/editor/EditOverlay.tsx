@@ -19,6 +19,7 @@ export default function EditOverlay() {
   const drawColor = usePdfStore((s) => s.drawColor)
   const drawSize = usePdfStore((s) => s.drawSize)
   const eraserSize = usePdfStore((s) => s.eraserSize)
+  const eraserColor = usePdfStore((s) => s.eraserColor)
   const mouseDownPos = useRef<{ x: number; y: number } | null>(null)
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
@@ -81,6 +82,7 @@ export default function EditOverlay() {
           width={viewportRef.width}
           height={viewportRef.height}
           size={eraserSize}
+          color={eraserColor}
         />
       )}
     </div>

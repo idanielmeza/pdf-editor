@@ -38,10 +38,11 @@ export async function savePdfWithOverlays(
         if (el.shapeType === 'rect') {
           page.drawRectangle({
             x: pdfX, y: pdfY, width: pdfW, height: pdfH,
-            borderColor: fill ? undefined : rgb(stroke.r, stroke.g, stroke.b),
-            borderWidth: fill ? 0 : el.strokeWidth / scale,
-            color: fill ? rgb(fill.r, fill.g, fill.b) : rgb(stroke.r, stroke.g, stroke.b),
-            opacity: fill ? 1 : undefined,
+            ...(fill ? { color: rgb(fill.r, fill.g, fill.b) } : {}),
+            ...(el.strokeWidth > 0 ? {
+              borderColor: rgb(stroke.r, stroke.g, stroke.b),
+              borderWidth: el.strokeWidth / scale,
+            } : {}),
           })
         } else if (el.shapeType === 'circle') {
           page.drawEllipse({

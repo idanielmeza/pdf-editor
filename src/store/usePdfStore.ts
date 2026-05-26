@@ -29,9 +29,11 @@ interface PdfStore {
   drawColor: string
   drawSize: number
   eraserSize: number
+  eraserColor: string
   setDrawColor: (c: string) => void
   setDrawSize: (s: number) => void
   setEraserSize: (s: number) => void
+  setEraserColor: (c: string) => void
 
   loadPdf: (file: File) => Promise<void>
   savePdf: () => Promise<void>
@@ -74,9 +76,11 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
   drawColor: '#000000',
   drawSize: 3,
   eraserSize: 20,
+  eraserColor: '#ffffff',
   setDrawColor: (c) => set({ drawColor: c }),
   setDrawSize: (s) => set({ drawSize: s }),
   setEraserSize: (s) => set({ eraserSize: s }),
+  setEraserColor: (c) => set({ eraserColor: c }),
   activeTool: null,
   ocrData: {},
   ocrProgress: 0,
@@ -94,6 +98,8 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
         pdfDoc, pdfLibDoc, pdfBytes, totalPages,
         fileName: file.name, currentPage: 1,
         elements, ocrData: {},
+        elementHistory: [JSON.parse(JSON.stringify(elements))],
+        historyIndex: 0,
       })
       get().addToast(t('toastLoaded'), 'success')
     } catch (e: any) {

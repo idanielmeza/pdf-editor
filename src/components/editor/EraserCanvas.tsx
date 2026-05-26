@@ -6,9 +6,10 @@ interface Props {
   width: number
   height: number
   size: number
+  color: string
 }
 
-export default function EraserCanvas({ width, height, size }: Props) {
+export default function EraserCanvas({ width, height, size, color }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const addElement = usePdfStore((s) => s.addElement)
   const setActiveTool = usePdfStore((s) => s.setActiveTool)
@@ -43,7 +44,7 @@ export default function EraserCanvas({ width, height, size }: Props) {
     e.preventDefault()
     const canvas = canvasRef.current!
     const ctx = canvas.getContext('2d')!
-    ctx.fillStyle = '#ffffff'
+    ctx.fillStyle = color
     erasing.current = true
     const pos = getPos(e)
     lastPos.current = pos
@@ -56,7 +57,7 @@ export default function EraserCanvas({ width, height, size }: Props) {
     if (!erasing.current) return
     const canvas = canvasRef.current!
     const ctx = canvas.getContext('2d')!
-    ctx.fillStyle = '#ffffff'
+    ctx.fillStyle = color
     const pos = getPos(e)
     const last = lastPos.current ?? pos
     const dist = Math.hypot(pos.x - last.x, pos.y - last.y)
@@ -94,7 +95,7 @@ export default function EraserCanvas({ width, height, size }: Props) {
       style={{
         position: 'absolute', top: 0, left: 0,
         width, height, zIndex: 25, pointerEvents: 'auto',
-        cursor: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'%3E%3Ccircle cx='${size/2}' cy='${size/2}' r='${size/2 - 1}' fill='white' stroke='%23999' stroke-width='1'/%3E%3C/svg%3E") ${size/2} ${size/2}, crosshair`,
+        cursor: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'%3E%3Ccircle cx='${size/2}' cy='${size/2}' r='${size/2 - 1}' fill='${encodeURIComponent(color)}' stroke='%23999' stroke-width='1'/%3E%3C/svg%3E") ${size/2} ${size/2}, crosshair`,
       }}
       onMouseDown={onStart}
       onMouseMove={onMove}

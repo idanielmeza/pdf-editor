@@ -22,9 +22,11 @@ export default function EditActions() {
   const drawColor = usePdfStore((s) => s.drawColor)
   const drawSize = usePdfStore((s) => s.drawSize)
   const eraserSize = usePdfStore((s) => s.eraserSize)
+  const eraserColor = usePdfStore((s) => s.eraserColor)
   const setDrawColor = usePdfStore((s) => s.setDrawColor)
   const setDrawSize = usePdfStore((s) => s.setDrawSize)
   const setEraserSize = usePdfStore((s) => s.setEraserSize)
+  const setEraserColor = usePdfStore((s) => s.setEraserColor)
   const [showReplace, setShowReplace] = useState(false)
   const [showTableConfig, setShowTableConfig] = useState(false)
   const [showSignature, setShowSignature] = useState(false)
@@ -117,10 +119,16 @@ export default function EditActions() {
           <i className="fas fa-eraser" /> {tHook('eraser') ?? 'Borrador'}
         </button>
         {activeTool === 'eraser' && (
-          <input type="range" min={5} max={80} value={eraserSize} title="Tamaño del borrador"
-            style={{ width: 70, accentColor: 'var(--accent-primary)' }}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setEraserSize(parseInt(e.target.value))}
-          />
+          <>
+            <input type="color" value={eraserColor} title="Color del borrador"
+              style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setEraserColor(e.target.value)}
+            />
+            <input type="range" min={5} max={80} value={eraserSize} title="Tamaño del borrador"
+              style={{ width: 70, accentColor: 'var(--accent-primary)' }}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setEraserSize(parseInt(e.target.value))}
+            />
+          </>
         )}
       </ToolbarGroup>
       <ToolbarGroup>

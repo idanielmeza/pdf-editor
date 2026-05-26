@@ -38,7 +38,7 @@ export default function FileActions() {
         </button>
       </ToolbarGroup>
       <ToolbarGroup>
-        <button className="btn" title={t('undo')} onClick={undo} disabled={!pdfDoc || historyIndex <= 0}>
+        <button className="btn" title={t('undo')} onClick={undo} disabled={!pdfDoc || historyIndex < 1}>
           <i className="fas fa-undo" />
         </button>
         <button className="btn" title={t('redo')} onClick={redo} disabled={!pdfDoc || historyIndex >= historyLen - 1}>
