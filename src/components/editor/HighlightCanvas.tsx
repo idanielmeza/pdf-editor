@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { usePdfStore } from '../../store/usePdfStore'
+import { useI18nStore } from '../../store/useI18nStore'
 import type { HighlightElement } from '../../types'
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 export default function HighlightCanvas({ width, height, color, opacity }: Props) {
   const addElement = usePdfStore((s) => s.addElement)
   const setActiveTool = usePdfStore((s) => s.setActiveTool)
+  const { t } = useI18nStore()
   const startPos = useRef<{ x: number; y: number } | null>(null)
   const [preview, setPreview] = useState<{ x: number; y: number; w: number; h: number } | null>(null)
 
@@ -85,9 +87,9 @@ export default function HighlightCanvas({ width, height, color, opacity }: Props
         onMouseDown={(e) => e.stopPropagation()}
         onMouseUp={(e) => e.stopPropagation()}
       >
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Arrastra para subrayar</span>
+        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t('dragToHighlight')}</span>
         <button className="btn primary" onMouseDown={(e) => { e.stopPropagation(); setActiveTool(null) }}>
-          <i className="fas fa-check" /> Listo
+          <i className="fas fa-check" /> {t('done')}
         </button>
       </div>
     </div>

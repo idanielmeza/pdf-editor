@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { usePdfStore } from '../../store/usePdfStore'
 import { useI18nStore } from '../../store/useI18nStore'
 import { t } from '../../store/useI18nStore'
@@ -9,8 +9,18 @@ import SignatureModal from '../ui/SignatureModal'
 import type { ImageElement, ShapeElement, ShapeType } from '../../types'
 import type { ChangeEvent } from 'react'
 
+function pickImage(): Promise<File | null> {
+  return new Promise((resolve) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.onchange = () => resolve(input.files?.[0] ?? null)
+    input.oncancel = () => resolve(null)
+    input.click()
+  })
+}
+
 export default function EditActions() {
-  const imgRef = useRef<HTMLInputElement>(null)
   const activeTool = usePdfStore((s) => s.activeTool)
   const setActiveTool = usePdfStore((s) => s.setActiveTool)
   const addElement = usePdfStore((s) => s.addElement)
@@ -43,8 +53,9 @@ export default function EditActions() {
   function toggleEraser() { setActiveTool(activeTool === 'eraser' ? null : 'eraser') }
   function toggleHighlight() { setActiveTool(activeTool === 'highlight' ? null : 'highlight') }
 
-  function handleImgSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
+  async function handleImgSelect() {
+    if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info')
+    const file = await pickImage()
     if (!file) return
     const reader = new FileReader()
     reader.onload = (ev) => {
@@ -56,7 +67,6 @@ export default function EditActions() {
       addElement(el)
     }
     reader.readAsDataURL(file)
-    e.target.value = ''
   }
 
   function addShape(shapeType: ShapeType) {
@@ -82,11 +92,10 @@ export default function EditActions() {
     <>
       {/* Group 1: Insert / annotate */}
       <ToolbarGroup>
-        <input ref={imgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImgSelect} />
         <button className={`btn ${activeTool === 'text' ? 'active' : ''}`} title="Agregar texto" onClick={toggleText}>
           <i className="fas fa-font" /> {tHook('text')}
         </button>
-        <button className="btn" title="Insertar imagen" onClick={need(() => imgRef.current?.click())}>
+        <button className="btn" title="Insertar imagen" onClick={handleImgSelect}>
           <i className="fas fa-image" /> {tHook('image')}
         </button>
         <button className="btn" title="Insertar firma" onClick={need(() => setShowSignature(true))}>

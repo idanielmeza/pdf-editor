@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { usePdfStore } from '../../store/usePdfStore'
+import { useI18nStore } from '../../store/useI18nStore'
 import type { DrawingElement } from '../../types'
 
 interface Props {
@@ -15,6 +16,7 @@ export default function DrawingCanvas({ width, height, color, size, onCommit }: 
   const drawing = useRef(false)
   const addElement = usePdfStore((s) => s.addElement)
   const setActiveTool = usePdfStore((s) => s.setActiveTool)
+  const { t } = useI18nStore()
   const [hasStrokes, setHasStrokes] = useState(false)
 
   useEffect(() => {
@@ -104,13 +106,13 @@ export default function DrawingCanvas({ width, height, color, size, onCommit }: 
         boxShadow: '0 4px 16px rgba(0,0,0,0.4)', zIndex: 26,
       }}>
         <button className="btn danger" onClick={() => { setActiveTool(null); onCommit() }}>
-          <i className="fas fa-times" /> Cancelar
+          <i className="fas fa-times" /> {t('cancel')}
         </button>
         <button className="btn" onClick={clear} disabled={!hasStrokes}>
-          <i className="fas fa-eraser" /> Limpiar
+          <i className="fas fa-eraser" /> {t('clear')}
         </button>
         <button className="btn primary" onClick={commit} disabled={!hasStrokes}>
-          <i className="fas fa-check" /> Aplicar
+          <i className="fas fa-check" /> {t('apply')}
         </button>
       </div>
     </div>

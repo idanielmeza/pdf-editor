@@ -94,6 +94,11 @@ const translations: Record<Lang, Record<string, string>> = {
     redo: 'Rehacer',
     eraser: 'Borrador',
     highlight: 'Subrayar',
+    installApp: 'Instalar App',
+    eraserActive: 'Borrador activo',
+    done: 'Listo',
+    apply: 'Aplicar',
+    dragToHighlight: 'Arrastra para resaltar',
   },
   en: {
     open: 'Open',
@@ -186,6 +191,11 @@ const translations: Record<Lang, Record<string, string>> = {
     redo: 'Redo',
     eraser: 'Eraser',
     highlight: 'Highlight',
+    installApp: 'Install App',
+    eraserActive: 'Eraser active',
+    done: 'Done',
+    apply: 'Apply',
+    dragToHighlight: 'Drag to highlight',
   },
 }
 

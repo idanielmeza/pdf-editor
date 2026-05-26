@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { usePdfStore } from '../../store/usePdfStore'
+import { useI18nStore } from '../../store/useI18nStore'
 import type { DrawingElement } from '../../types'
 
 interface Props {
@@ -13,6 +14,7 @@ export default function EraserCanvas({ width, height, size, color }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const addElement = usePdfStore((s) => s.addElement)
   const setActiveTool = usePdfStore((s) => s.setActiveTool)
+  const { t } = useI18nStore()
   const erasing = useRef(false)
   const lastPos = useRef<{ x: number; y: number } | null>(null)
   const hasStrokes = useRef(false)
@@ -120,9 +122,9 @@ export default function EraserCanvas({ width, height, size, color }: Props) {
         onMouseDown={(e) => e.stopPropagation()}
         onMouseUp={(e) => e.stopPropagation()}
       >
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Borrador activo</span>
+        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t('eraserActive')}</span>
         <button className="btn primary" onMouseDown={(e) => { e.stopPropagation(); setActiveTool(null) }}>
-          <i className="fas fa-check" /> Listo
+          <i className="fas fa-check" /> {t('done')}
         </button>
       </div>
     </div>

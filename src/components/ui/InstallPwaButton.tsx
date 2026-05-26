@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useI18nStore } from '../../store/useI18nStore'
 
 export default function InstallPwaButton() {
   const [prompt, setPrompt] = useState<any>(() => (window as any).__pwaInstallPrompt ?? null)
   const [installed, setInstalled] = useState(false)
+  const { t } = useI18nStore()
 
   useEffect(() => {
     // Pick up prompt if already captured before mount
@@ -37,7 +39,7 @@ export default function InstallPwaButton() {
       title="Instalar como aplicación"
       onClick={install}
     >
-      <i className="fas fa-download" /> Instalar App
+      <i className="fas fa-download" /> {t('installApp')}
     </button>
   )
 }
