@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb, degrees, PDFName } from 'pdf-lib'
+import { PDFDocument, StandardFonts, rgb, degrees, PDFName, PDFBool } from 'pdf-lib'
 import type { OverlayElement } from '../types'
 
 function hexToRgb(hex: string) {
@@ -19,7 +19,15 @@ export async function savePdfWithOverlays(
 ): Promise<void> {
   const doc = await PDFDocument.load(pdfBytes)
 
-  // Remove AcroForm and all widget annotations from every page
+  // Remove AcroForm fields and all annotations from every page
+  try {
+    const form = doc.getForm()
+    // Access underlying dict to clear field entries
+    const acroDict = form.acroForm.dict
+    acroDict.set(PDFName.of('NeedAppearances'), PDFBool.False)
+    acroDict.delete(PDFName.of('Fields'))
+    acroDict.delete(PDFName.of('DR'))
+  } catch { /* ignore */ }
   doc.catalog.delete(PDFName.of('AcroForm'))
   const pages = doc.getPages()
   for (const page of pages) {

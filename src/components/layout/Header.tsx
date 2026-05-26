@@ -1,6 +1,7 @@
 import Toolbar from '../toolbar/Toolbar'
 import { useI18nStore } from '../../store/useI18nStore'
 import { useThemeStore } from '../../store/useThemeStore'
+import InstallPwaButton from '../ui/InstallPwaButton'
 
 export default function Header() {
   const { lang, toggleLang } = useI18nStore()
@@ -17,6 +18,7 @@ export default function Header() {
       </div>
       <Toolbar />
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginLeft: 'auto', flexShrink: 0 }}>
+        <InstallPwaButton />
         <button
           className="btn"
           title={lang === 'es' ? 'Switch to English' : 'Cambiar a Español'}
