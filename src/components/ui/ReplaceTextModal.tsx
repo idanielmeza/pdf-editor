@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { usePdfStore } from '../../store/usePdfStore'
+import { useI18nStore } from '../../store/useI18nStore'
+import { t as tFn } from '../../store/useI18nStore'
 
 interface Props { onClose: () => void }
 
@@ -13,6 +15,7 @@ export default function ReplaceTextModal({ onClose }: Props) {
   const zoom = usePdfStore((s) => s.zoom)
   const addElement = usePdfStore((s) => s.addElement)
   const addToast = usePdfStore((s) => s.addToast)
+  const { t } = useI18nStore()
 
   async function handleSearch() {
     if (!pdfDoc || !searchText.trim()) return
@@ -38,18 +41,16 @@ export default function ReplaceTextModal({ onClose }: Props) {
     }
     setMatches(found)
     setSearching(false)
-    if (!found.length) addToast('No se encontró texto', 'info')
+    if (!found.length) addToast(tFn('toastNotFound'), 'info')
   }
 
   function handleReplace(match: any) {
-    // White-out: white rectangle over original text
     addElement({
       type: 'shape', id: crypto.randomUUID(), shapeType: 'rect',
       x: match.x - 1, y: match.y - 1,
       w: match.w + 2, h: match.h + 4,
       strokeColor: '#ffffff', fillColor: '#ffffff', strokeWidth: 0,
     } as any)
-    // New text on top
     addElement({
       type: 'text', id: crypto.randomUUID(),
       x: match.x, y: match.y,
@@ -57,7 +58,7 @@ export default function ReplaceTextModal({ onClose }: Props) {
       size: Math.round(match.fontSize),
       color: '#000000',
     })
-    addToast('Reemplazado', 'success')
+    addToast(tFn('toastReplaced'), 'success')
   }
 
   function handleReplaceAll() {
@@ -75,9 +76,9 @@ export default function ReplaceTextModal({ onClose }: Props) {
         background: 'var(--bg-card)', border: '1px solid var(--border-color)',
         borderRadius: 12, padding: '1.5rem', minWidth: 400, maxWidth: 500
       }}>
-        <h3 style={{ marginBottom: '1rem' }}>Buscar y Reemplazar</h3>
+        <h3 style={{ marginBottom: '1rem' }}>{t('searchReplace')}</h3>
         <div className="prop-row" style={{ marginBottom: '0.8rem' }}>
-          <label style={{ width: 80 }}>Buscar</label>
+          <label style={{ width: 80 }}>{t('search')}</label>
           <input
             style={{ flex: 1, background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 4, color: 'var(--text-primary)', padding: '0.4rem' }}
             value={searchText} onChange={(e) => setSearchText(e.target.value)}
@@ -86,7 +87,7 @@ export default function ReplaceTextModal({ onClose }: Props) {
           />
         </div>
         <div className="prop-row" style={{ marginBottom: '1rem' }}>
-          <label style={{ width: 80 }}>Reemplazar</label>
+          <label style={{ width: 80 }}>{t('replaceLabel')}</label>
           <input
             style={{ flex: 1, background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 4, color: 'var(--text-primary)', padding: '0.4rem' }}
             value={replaceText} onChange={(e) => setReplaceText(e.target.value)}
@@ -95,11 +96,11 @@ export default function ReplaceTextModal({ onClose }: Props) {
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
           <button className="btn primary" onClick={handleSearch} disabled={searching} style={{ flex: 1 }}>
-            <i className="fas fa-search" /> {searching ? 'Buscando...' : 'Buscar'}
+            <i className="fas fa-search" /> {searching ? t('searching') : t('search')}
           </button>
           {matches.length > 0 && (
             <button className="btn" onClick={handleReplaceAll} style={{ flex: 1 }}>
-              <i className="fas fa-exchange-alt" /> Reemplazar todo ({matches.length})
+              <i className="fas fa-exchange-alt" /> {t('replaceAll')} ({matches.length})
             </button>
           )}
           <button className="btn" onClick={onClose}><i className="fas fa-times" /></button>
@@ -110,7 +111,7 @@ export default function ReplaceTextModal({ onClose }: Props) {
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem', borderBottom: '1px solid var(--border-color)' }}>
                 <span style={{ flex: 1, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>"{m.str}"</span>
                 <button className="btn" style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }} onClick={() => handleReplace(m)}>
-                  Reemplazar
+                  {t('replaceOne')}
                 </button>
               </div>
             ))}

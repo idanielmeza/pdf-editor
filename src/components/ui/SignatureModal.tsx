@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { usePdfStore } from '../../store/usePdfStore'
+import { useI18nStore } from '../../store/useI18nStore'
+import { t as tFn } from '../../store/useI18nStore'
 import type { ImageElement } from '../../types'
 
 interface Props { onClose: () => void }
@@ -16,8 +18,8 @@ export default function SignatureModal({ onClose }: Props) {
   const addElement = usePdfStore((s) => s.addElement)
   const addToast = usePdfStore((s) => s.addToast)
   const viewportRef = usePdfStore((s) => s.viewportRef)
+  const { t } = useI18nStore()
 
-  // Setup canvas
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -86,7 +88,7 @@ export default function SignatureModal({ onClose }: Props) {
 
   function insertDrawnSignature() {
     const canvas = canvasRef.current!
-    if (isEmpty) return addToast('Dibuja una firma primero', 'info')
+    if (isEmpty) return addToast(tFn('toastSignatureDraw'), 'info')
     const dataUrl = canvas.toDataURL('image/png')
     insertSignatureImage(dataUrl, 300, 100)
   }
@@ -110,14 +112,14 @@ export default function SignatureModal({ onClose }: Props) {
       x: cx, y: cy, w, h, src,
     }
     addElement(el)
-    addToast('Firma insertada', 'success')
+    addToast(tFn('toastSignatureInserted'), 'success')
     onClose()
   }
 
-  const tabStyle = (t: Tab): React.CSSProperties => ({
+  const tabStyle = (tb: Tab): React.CSSProperties => ({
     flex: 1, padding: '0.5rem', border: 'none', cursor: 'pointer',
-    background: tab === t ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
-    color: tab === t ? 'white' : 'var(--text-secondary)',
+    background: tab === tb ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+    color: tab === tb ? 'white' : 'var(--text-secondary)',
     fontFamily: 'inherit', fontSize: '0.85rem', fontWeight: 500,
     transition: 'all 0.2s',
   })
@@ -135,44 +137,41 @@ export default function SignatureModal({ onClose }: Props) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>
             <i className="fas fa-signature" style={{ marginRight: 8, color: 'var(--accent-secondary)' }} />
-            Insertar Firma
+            {t('insertSignature')}
           </h3>
           <button className="btn" onClick={onClose} style={{ padding: '0.2rem 0.5rem' }}>
             <i className="fas fa-times" />
           </button>
         </div>
 
-        {/* Tabs */}
         <div style={{ display: 'flex', borderRadius: 8, overflow: 'hidden', marginBottom: '1rem', border: '1px solid var(--border-color)' }}>
           <button style={tabStyle('draw')} onClick={() => setTab('draw')}>
-            <i className="fas fa-pen" style={{ marginRight: 6 }} />Dibujar
+            <i className="fas fa-pen" style={{ marginRight: 6 }} />{t('draw')}
           </button>
           <button style={tabStyle('upload')} onClick={() => setTab('upload')}>
-            <i className="fas fa-upload" style={{ marginRight: 6 }} />Subir imagen
+            <i className="fas fa-upload" style={{ marginRight: 6 }} />{t('upload')}
           </button>
         </div>
 
         {tab === 'draw' && (
           <>
-            {/* Pen controls */}
             <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', marginBottom: '0.7rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                <label>Color</label>
+                <label>{t('penColor')}</label>
                 <input type="color" value={penColor} onChange={(e) => setPenColor(e.target.value)}
                   style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer' }} />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                <label>Grosor</label>
+                <label>{t('penThickness')}</label>
                 <input type="range" min={1} max={8} value={penWidth} onChange={(e) => setPenWidth(parseInt(e.target.value))}
                   style={{ width: 80 }} />
                 <span>{penWidth}px</span>
               </div>
               <button className="btn" onClick={clearCanvas} style={{ marginLeft: 'auto', fontSize: '0.8rem', padding: '0.2rem 0.6rem' }}>
-                <i className="fas fa-eraser" /> Limpiar
+                <i className="fas fa-eraser" /> {t('clear')}
               </button>
             </div>
 
-            {/* Drawing canvas */}
             <div style={{ border: '2px solid var(--border-color)', borderRadius: 8, overflow: 'hidden', marginBottom: '1rem', background: '#fff', cursor: 'crosshair' }}>
               <canvas
                 ref={canvasRef}
@@ -189,10 +188,10 @@ export default function SignatureModal({ onClose }: Props) {
               />
             </div>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              Dibuja tu firma en el área blanca. Puedes usar mouse o pantalla táctil.
+              {t('drawSignatureHint')}
             </p>
             <button className="btn primary" style={{ width: '100%' }} onClick={insertDrawnSignature}>
-              <i className="fas fa-check" /> Insertar firma dibujada
+              <i className="fas fa-check" /> {t('insertDrawn')}
             </button>
           </>
         )}
@@ -201,8 +200,9 @@ export default function SignatureModal({ onClose }: Props) {
           <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
             <i className="fas fa-file-image" style={{ fontSize: '3rem', color: 'var(--accent-secondary)', marginBottom: '1rem', display: 'block' }} />
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-              Sube una imagen PNG/JPG de tu firma.<br />
-              Se recomienda fondo transparente (PNG).
+              {t('uploadSignatureHint').split('\n').map((line, i) => (
+                <span key={i}>{line}{i === 0 && <br />}</span>
+              ))}
             </p>
             <label style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -210,7 +210,7 @@ export default function SignatureModal({ onClose }: Props) {
               color: 'white', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem',
             }}>
               <i className="fas fa-upload" />
-              Seleccionar imagen
+              {t('selectImage')}
               <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleUpload} />
             </label>
           </div>

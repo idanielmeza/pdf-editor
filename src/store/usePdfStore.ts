@@ -3,6 +3,7 @@ import { loadPdfFile, refreshFromLibDoc } from '../services/pdfLoader'
 import { savePdfWithOverlays } from '../services/pdfSaver'
 import { addBlankPage, duplicatePageInDoc, deletePageFromDoc, rotatePageInDoc, cropPageInDoc } from '../services/pageOps'
 import { runOcrOnCanvas } from '../services/ocrService'
+import { t } from './useI18nStore'
 import type { OverlayElement, OcrData, Toast, ToolName } from '../types'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { PDFDocument } from 'pdf-lib'
@@ -65,7 +66,7 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
   viewportRef: null,
 
   loadPdf: async (file) => {
-    get().addToast('Cargando...', 'info')
+    get().addToast(t('toastLoading'), 'info')
     try {
       const { pdfDoc, pdfLibDoc, pdfBytes, totalPages } = await loadPdfFile(file)
       const elements: Record<number, OverlayElement[]> = {}
@@ -75,21 +76,21 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
         fileName: file.name, currentPage: 1,
         elements, ocrData: {},
       })
-      get().addToast('PDF cargado', 'success')
+      get().addToast(t('toastLoaded'), 'success')
     } catch (e: any) {
-      get().addToast('Error al cargar: ' + e.message, 'error')
+      get().addToast(t('toastLoadError') + e.message, 'error')
     }
   },
 
   savePdf: async () => {
     const { pdfBytes, elements, totalPages, fileName, zoom } = get()
-    if (!pdfBytes) return get().addToast('Nada que guardar', 'error')
-    get().addToast('Guardando...', 'info')
+    if (!pdfBytes) return get().addToast(t('toastNothingToSave'), 'error')
+    get().addToast(t('toastSaving'), 'info')
     try {
       await savePdfWithOverlays(pdfBytes, elements, totalPages, fileName, zoom)
-      get().addToast('Guardado', 'success')
+      get().addToast(t('toastSaved'), 'success')
     } catch (e: any) {
-      get().addToast('Error al guardar: ' + e.message, 'error')
+      get().addToast(t('toastSaveError') + e.message, 'error')
     }
   },
 
@@ -148,7 +149,7 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
     const { totalPages, elements } = get()
     set({ elements: { ...elements, [totalPages]: [] } })
     get().goToPage(totalPages)
-    get().addToast('Página agregada', 'success')
+    get().addToast(t('toastPageAdded'), 'success')
   },
 
   duplicatePage: async () => {
@@ -164,12 +165,12 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
       else newElements[i] = elements[i - 1] ?? []
     }
     set({ elements: newElements })
-    get().addToast('Duplicada', 'success')
+    get().addToast(t('toastDuplicated'), 'success')
   },
 
   deletePage: async (n) => {
     const { pdfLibDoc, totalPages, elements, currentPage } = get()
-    if (!pdfLibDoc || totalPages <= 1) return get().addToast('No puedes eliminar la última', 'error')
+    if (!pdfLibDoc || totalPages <= 1) return get().addToast(t('toastCantDeleteLast'), 'error')
     deletePageFromDoc(pdfLibDoc, n - 1)
     await get().refreshLibDoc()
     const { totalPages: newTotal } = get()
@@ -178,7 +179,7 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
     const nextPage = currentPage > newTotal ? newTotal : currentPage
     set({ elements: newElements })
     get().goToPage(nextPage)
-    get().addToast('Eliminada', 'success')
+    get().addToast(t('toastDeleted'), 'success')
   },
 
   rotateCurrentPage: async () => {
@@ -186,7 +187,7 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
     if (!pdfLibDoc) return
     rotatePageInDoc(pdfLibDoc, currentPage - 1)
     await get().refreshLibDoc()
-    get().addToast('Rotada', 'success')
+    get().addToast(t('toastRotated'), 'success')
   },
 
   cropCurrentPage: async (x, y, w, h) => {
@@ -194,7 +195,7 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
     if (!pdfLibDoc) return
     cropPageInDoc(pdfLibDoc, currentPage - 1, x, y, w, h)
     await get().refreshLibDoc()
-    get().addToast('Recortado', 'success')
+    get().addToast(t('toastCropped'), 'success')
   },
 
   runOcr: async (pageNum, canvas) => {
@@ -203,10 +204,10 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
       const ocrData = await runOcrOnCanvas(canvas, (pct) => set({ ocrProgress: pct }))
       const { ocrData: existing } = get()
       set({ ocrData: { ...existing, [pageNum]: ocrData }, ocrActive: false })
-      get().addToast('OCR completado', 'success')
+      get().addToast(t('toastOcrDone'), 'success')
     } catch {
       set({ ocrActive: false })
-      get().addToast('Error OCR', 'error')
+      get().addToast(t('toastOcrError'), 'error')
     }
   },
 
@@ -222,8 +223,8 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
 
   mergePdf: async (file) => {
     const { pdfLibDoc, elements, totalPages } = get()
-    if (!pdfLibDoc) return get().addToast('Abre un PDF primero', 'error')
-    get().addToast('Fusionando...', 'info')
+    if (!pdfLibDoc) return get().addToast(t('toastMergeFirst'), 'error')
+    get().addToast(t('toastMerging'), 'info')
     try {
       const { mergePdfIntoDoc } = await import('../services/pageOps')
       await mergePdfIntoDoc(pdfLibDoc, file)
@@ -232,22 +233,22 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
       const newElements = { ...elements }
       for (let i = totalPages + 1; i <= newTotal; i++) newElements[i] = []
       set({ elements: newElements })
-      get().addToast(`PDF fusionado (${newTotal} páginas)`, 'success')
+      get().addToast(`${t('toastMerged')} (${newTotal} ${t('pages').toLowerCase()})`, 'success')
     } catch (e: any) {
-      get().addToast('Error al fusionar: ' + e.message, 'error')
+      get().addToast(t('toastMergeError') + e.message, 'error')
     }
   },
 
   exportWord: async () => {
     const { pdfDoc, elements, totalPages, fileName } = get()
-    if (!pdfDoc || !totalPages) return get().addToast('Nada que exportar', 'error')
-    get().addToast('Exportando Word...', 'info')
+    if (!pdfDoc || !totalPages) return get().addToast(t('toastNothingExport'), 'error')
+    get().addToast(t('toastExporting'), 'info')
     try {
       const { exportToWord } = await import('../services/wordExporter')
       await exportToWord(pdfDoc, elements, totalPages, fileName || 'documento.pdf')
-      get().addToast('Exportado', 'success')
+      get().addToast(t('toastExported'), 'success')
     } catch (e: any) {
-      get().addToast('Error exportando: ' + e.message, 'error')
+      get().addToast(t('toastExportError') + e.message, 'error')
     }
   },
 }))

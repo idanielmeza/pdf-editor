@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'
 import { usePdfStore } from '../../store/usePdfStore'
+import { useI18nStore } from '../../store/useI18nStore'
+import { t } from '../../store/useI18nStore'
 import ToolbarGroup from './ToolbarGroup'
 import ReplaceTextModal from '../ui/ReplaceTextModal'
 import TableConfigModal from '../ui/TableConfigModal'
@@ -19,6 +21,7 @@ export default function EditActions() {
   const [showReplace, setShowReplace] = useState(false)
   const [showTableConfig, setShowTableConfig] = useState(false)
   const [showSignature, setShowSignature] = useState(false)
+  const { t: tHook } = useI18nStore()
 
   function toggleText() {
     setActiveTool(activeTool === 'text' ? null : 'text')
@@ -41,7 +44,7 @@ export default function EditActions() {
   }
 
   function addShape(shapeType: ShapeType) {
-    if (!pdfDoc) return addToast('Abre un PDF', 'info')
+    if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info')
     const cx = viewportRef ? viewportRef.width / 2 : 100
     const cy = viewportRef ? viewportRef.height / 2 : 100
     const el: ShapeElement = {
@@ -53,7 +56,7 @@ export default function EditActions() {
   }
 
   async function handleOcr() {
-    if (!pdfDoc) return addToast('Abre un PDF', 'info')
+    if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info')
     const canvas = document.querySelector<HTMLCanvasElement>('#pdf-canvas')
     if (!canvas) return
     await runOcr(currentPage, canvas)
@@ -64,19 +67,19 @@ export default function EditActions() {
       <ToolbarGroup>
         <input ref={imgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImgSelect} />
         <button className={`btn ${activeTool === 'text' ? 'active' : ''}`} title="Activar herramienta de texto — clic en página para agregar texto" onClick={toggleText}>
-          <i className="fas fa-font" /> Texto
+          <i className="fas fa-font" /> {tHook('text')}
         </button>
-        <button className="btn" title="Insertar imagen en la página actual" onClick={() => { if (!pdfDoc) return addToast('Abre un PDF', 'info'); imgRef.current?.click() }}>
-          <i className="fas fa-image" /> Imagen
+        <button className="btn" title="Insertar imagen en la página actual" onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); imgRef.current?.click() }}>
+          <i className="fas fa-image" /> {tHook('image')}
         </button>
         <button className="btn" title="Ejecutar OCR para detectar texto en PDFs escaneados" onClick={handleOcr}>
-          <i className="fas fa-microscope" /> OCR
+          <i className="fas fa-microscope" /> {tHook('ocr')}
         </button>
-        <button className="btn" title="Buscar y reemplazar texto en la página actual" onClick={() => { if (!pdfDoc) return addToast('Abre un PDF', 'info'); setShowReplace(true) }}>
-          <i className="fas fa-exchange-alt" /> Reemplazar
+        <button className="btn" title="Buscar y reemplazar texto en la página actual" onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); setShowReplace(true) }}>
+          <i className="fas fa-exchange-alt" /> {tHook('replace')}
         </button>
-        <button className="btn" title="Insertar firma dibujada o desde imagen" onClick={() => { if (!pdfDoc) return addToast('Abre un PDF', 'info'); setShowSignature(true) }}>
-          <i className="fas fa-signature" /> Firma
+        <button className="btn" title="Insertar firma dibujada o desde imagen" onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); setShowSignature(true) }}>
+          <i className="fas fa-signature" /> {tHook('signature')}
         </button>
       </ToolbarGroup>
       <ToolbarGroup>
@@ -92,8 +95,8 @@ export default function EditActions() {
         <button className="btn" onClick={() => addShape('arrow')} disabled={!pdfDoc} title="Flecha">
           <i className="fas fa-arrow-right" />
         </button>
-        <button className="btn" onClick={() => { if (!pdfDoc) return addToast('Abre un PDF', 'info'); setShowTableConfig(true) }} disabled={!pdfDoc} title="Insertar tabla con filas y columnas personalizadas">
-          <i className="fas fa-table" /> Tabla
+        <button className="btn" onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); setShowTableConfig(true) }} disabled={!pdfDoc} title="Insertar tabla con filas y columnas personalizadas">
+          <i className="fas fa-table" /> {tHook('table')}
         </button>
       </ToolbarGroup>
       {showReplace && <ReplaceTextModal onClose={() => setShowReplace(false)} />}
