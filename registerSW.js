@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/pdf-editor/sw.js', { scope: '/pdf-editor/' })})}
