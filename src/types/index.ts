@@ -62,6 +62,7 @@ export interface DrawingElement {
   w: number
   h: number
   src: string  // data URL of the drawing canvas
+  eraser?: boolean
 }
 
 export type OverlayElement = TextElement | ImageElement | ShapeElement | TableElement | DrawingElement

@@ -9,6 +9,20 @@ export default function DrawingElementComp({ element }: { element: DrawingElemen
   const { onMouseDown } = useDrag(element.id)
   const isSelected = selectedId === element.id
 
+  if (element.eraser) {
+    return (
+      <img
+        src={element.src}
+        style={{
+          position: 'absolute', left: element.x, top: element.y,
+          width: element.w, height: element.h,
+          display: 'block', pointerEvents: 'none',
+        }}
+        draggable={false}
+      />
+    )
+  }
+
   return (
     <div
       style={{ position: 'absolute', left: element.x, top: element.y, pointerEvents: 'auto' }}
