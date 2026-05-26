@@ -4,6 +4,8 @@ import TextElement from './TextElement'
 import ImageElement from './ImageElement'
 import ShapeElement from './ShapeElement'
 import TableElement from './TableElement'
+import DrawingElementComp from './DrawingElementComp'
+import DrawingCanvas from './DrawingCanvas'
 
 export default function EditOverlay() {
   const elements = usePdfStore((s) => s.elements)
@@ -11,7 +13,10 @@ export default function EditOverlay() {
   const activeTool = usePdfStore((s) => s.activeTool)
   const addElement = usePdfStore((s) => s.addElement)
   const selectElement = usePdfStore((s) => s.selectElement)
+  const setActiveTool = usePdfStore((s) => s.setActiveTool)
   const viewportRef = usePdfStore((s) => s.viewportRef)
+  const drawColor = usePdfStore((s) => s.drawColor)
+  const drawSize = usePdfStore((s) => s.drawSize)
   const mouseDownPos = useRef<{ x: number; y: number } | null>(null)
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
@@ -25,10 +30,8 @@ export default function EditOverlay() {
     const dx = Math.abs(e.clientX - mouseDownPos.current.x)
     const dy = Math.abs(e.clientY - mouseDownPos.current.y)
     mouseDownPos.current = null
-    // Deselect on click on empty area
     selectElement(null)
     if (dx > 5 || dy > 5) return
-    // Only create text element if text tool active
     if (activeTool !== 'text') return
     const rect = e.currentTarget.getBoundingClientRect()
     addElement({
@@ -39,6 +42,7 @@ export default function EditOverlay() {
   }
 
   const pageElements = elements[currentPage] ?? []
+  const isDrawing = activeTool === 'draw'
 
   return (
     <div
@@ -46,9 +50,7 @@ export default function EditOverlay() {
       style={{
         position: 'absolute', top: 0, left: 0,
         width: viewportRef?.width, height: viewportRef?.height,
-        // 'auto' only when text tool active (needs to capture clicks for new elements)
-        // otherwise 'none' so TextLayer stays clickable — child elements have their own pointerEvents
-        pointerEvents: activeTool === 'text' ? 'auto' : 'none',
+        pointerEvents: (activeTool === 'text' || activeTool === 'draw') ? 'auto' : 'none',
       }}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
@@ -58,8 +60,19 @@ export default function EditOverlay() {
         if (el.type === 'image') return <ImageElement key={el.id} element={el} />
         if (el.type === 'shape') return <ShapeElement key={el.id} element={el} />
         if (el.type === 'table') return <TableElement key={el.id} element={el} />
+        if (el.type === 'drawing') return <DrawingElementComp key={el.id} element={el} />
         return null
       })}
+
+      {isDrawing && viewportRef && (
+        <DrawingCanvas
+          width={viewportRef.width}
+          height={viewportRef.height}
+          color={drawColor}
+          size={drawSize}
+          onCommit={() => setActiveTool(null)}
+        />
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import type { PDFDocumentProxy, PageViewport } from 'pdfjs-dist'
 import type { PDFDocument } from 'pdf-lib'
 
-export type ToolName = 'text' | 'crop' | null
+export type ToolName = 'text' | 'crop' | 'draw' | null
 
 export interface TextElement {
   type: 'text'
@@ -54,7 +54,17 @@ export interface TableElement {
   fontSize: number
 }
 
-export type OverlayElement = TextElement | ImageElement | ShapeElement | TableElement
+export interface DrawingElement {
+  type: 'drawing'
+  id: string
+  x: number
+  y: number
+  w: number
+  h: number
+  src: string  // data URL of the drawing canvas
+}
+
+export type OverlayElement = TextElement | ImageElement | ShapeElement | TableElement | DrawingElement
 
 export interface OcrLine {
   text: string

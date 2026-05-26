@@ -7,6 +7,7 @@ import ReplaceTextModal from '../ui/ReplaceTextModal'
 import TableConfigModal from '../ui/TableConfigModal'
 import SignatureModal from '../ui/SignatureModal'
 import type { ImageElement, ShapeElement, ShapeType } from '../../types'
+import type { ChangeEvent } from 'react'
 
 export default function EditActions() {
   const imgRef = useRef<HTMLInputElement>(null)
@@ -18,14 +19,17 @@ export default function EditActions() {
   const runOcr = usePdfStore((s) => s.runOcr)
   const addToast = usePdfStore((s) => s.addToast)
   const viewportRef = usePdfStore((s) => s.viewportRef)
+  const drawColor = usePdfStore((s) => s.drawColor)
+  const drawSize = usePdfStore((s) => s.drawSize)
+  const setDrawColor = usePdfStore((s) => s.setDrawColor)
+  const setDrawSize = usePdfStore((s) => s.setDrawSize)
   const [showReplace, setShowReplace] = useState(false)
   const [showTableConfig, setShowTableConfig] = useState(false)
   const [showSignature, setShowSignature] = useState(false)
   const { t: tHook } = useI18nStore()
 
-  function toggleText() {
-    setActiveTool(activeTool === 'text' ? null : 'text')
-  }
+  function toggleText() { setActiveTool(activeTool === 'text' ? null : 'text') }
+  function toggleDraw() { setActiveTool(activeTool === 'draw' ? null : 'draw') }
 
   function handleImgSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -81,6 +85,26 @@ export default function EditActions() {
         <button className="btn" title="Insertar firma dibujada o desde imagen" onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); setShowSignature(true) }}>
           <i className="fas fa-signature" /> {tHook('signature')}
         </button>
+        <button
+          className={`btn ${activeTool === 'draw' ? 'active' : ''}`}
+          title="Dibujar a mano alzada sobre la página"
+          onClick={() => { if (!pdfDoc) return addToast(t('toastOpenFirst'), 'info'); toggleDraw() }}
+          disabled={!pdfDoc}
+        >
+          <i className="fas fa-pencil-alt" /> {tHook('draw') ?? 'Borrador'}
+        </button>
+        {activeTool === 'draw' && (
+          <>
+            <input type="color" value={drawColor} title="Color del borrador"
+              style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setDrawColor(e.target.value)}
+            />
+            <input type="range" min={1} max={30} value={drawSize} title="Grosor del borrador"
+              style={{ width: 70, accentColor: 'var(--accent-primary)' }}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setDrawSize(parseInt(e.target.value))}
+            />
+          </>
+        )}
       </ToolbarGroup>
       <ToolbarGroup>
         <button className="btn" onClick={() => addShape('rect')} disabled={!pdfDoc} title="Rectángulo">

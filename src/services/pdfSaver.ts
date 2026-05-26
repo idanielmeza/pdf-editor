@@ -68,9 +68,8 @@ export async function savePdfWithOverlays(
           font,
           color: rgb(r, g, b),
         })
-      } else if (el.type === 'image') {
+      } else if (el.type === 'image' || el.type === 'drawing') {
         const imgBytes = await fetch(el.src).then((r) => r.arrayBuffer())
-        // Detect type from data URL mime or fallback to PNG
         const isPng = el.src.startsWith('data:image/png') || (!el.src.startsWith('data:image/jp') && el.src.includes('png'))
         const img = isPng
           ? await doc.embedPng(imgBytes)

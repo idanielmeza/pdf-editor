@@ -26,6 +26,10 @@ interface PdfStore {
   ocrActive: boolean
   toasts: Toast[]
   viewportRef: { width: number; height: number } | null
+  drawColor: string
+  drawSize: number
+  setDrawColor: (c: string) => void
+  setDrawSize: (s: number) => void
 
   loadPdf: (file: File) => Promise<void>
   savePdf: () => Promise<void>
@@ -65,6 +69,10 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
   elementHistory: [],
   historyIndex: -1,
   selectedId: null,
+  drawColor: '#000000',
+  drawSize: 3,
+  setDrawColor: (c) => set({ drawColor: c }),
+  setDrawSize: (s) => set({ drawSize: s }),
   activeTool: null,
   ocrData: {},
   ocrProgress: 0,
