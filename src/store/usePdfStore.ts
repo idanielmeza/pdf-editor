@@ -17,6 +17,8 @@ interface PdfStore {
   totalPages: number
   zoom: number
   elements: Record<number, OverlayElement[]>
+  elementHistory: Record<number, OverlayElement[]>[]
+  historyIndex: number
   selectedId: string | null
   activeTool: ToolName
   ocrData: Record<number, OcrData>
@@ -46,6 +48,9 @@ interface PdfStore {
   setViewport: (vp: { width: number; height: number } | null) => void
   mergePdf: (file: File) => Promise<void>
   exportWord: () => Promise<void>
+  undo: () => void
+  redo: () => void
+  pushHistory: (elements: Record<number, OverlayElement[]>) => void
 }
 
 export const usePdfStore = create<PdfStore>((set, get) => ({
@@ -57,6 +62,8 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
   totalPages: 0,
   zoom: 1,
   elements: {},
+  elementHistory: [],
+  historyIndex: -1,
   selectedId: null,
   activeTool: null,
   ocrData: {},
@@ -109,32 +116,53 @@ export const usePdfStore = create<PdfStore>((set, get) => ({
 
   setZoom: (z) => set({ zoom: Math.min(3, Math.max(0.25, z)) }),
 
+  pushHistory: (elements) => {
+    const { elementHistory, historyIndex } = get()
+    const trimmed = elementHistory.slice(0, historyIndex + 1)
+    const next = [...trimmed, JSON.parse(JSON.stringify(elements))].slice(-50)
+    set({ elementHistory: next, historyIndex: next.length - 1 })
+  },
+
   addElement: (el) => {
     const { elements, currentPage } = get()
-    set({ elements: { ...elements, [currentPage]: [...(elements[currentPage] ?? []), el] } })
+    const next = { ...elements, [currentPage]: [...(elements[currentPage] ?? []), el] }
+    get().pushHistory(next)
+    set({ elements: next })
   },
 
   updateElement: (id, patch) => {
     const { elements, currentPage } = get()
-    set({
-      elements: {
-        ...elements,
-        [currentPage]: elements[currentPage].map((el) =>
-          el.id === id ? ({ ...el, ...patch } as OverlayElement) : el
-        ),
-      },
-    })
+    const next = {
+      ...elements,
+      [currentPage]: elements[currentPage].map((el) =>
+        el.id === id ? ({ ...el, ...patch } as OverlayElement) : el
+      ),
+    }
+    set({ elements: next })
   },
 
   deleteElement: (id) => {
     const { elements, currentPage } = get()
-    set({
-      elements: {
-        ...elements,
-        [currentPage]: elements[currentPage].filter((el) => el.id !== id),
-      },
-      selectedId: null,
-    })
+    const next = {
+      ...elements,
+      [currentPage]: elements[currentPage].filter((el) => el.id !== id),
+    }
+    get().pushHistory(next)
+    set({ elements: next, selectedId: null })
+  },
+
+  undo: () => {
+    const { elementHistory, historyIndex } = get()
+    if (historyIndex <= 0) return
+    const prev = historyIndex - 1
+    set({ elements: JSON.parse(JSON.stringify(elementHistory[prev])), historyIndex: prev, selectedId: null })
+  },
+
+  redo: () => {
+    const { elementHistory, historyIndex } = get()
+    if (historyIndex >= elementHistory.length - 1) return
+    const next = historyIndex + 1
+    set({ elements: JSON.parse(JSON.stringify(elementHistory[next])), historyIndex: next, selectedId: null })
   },
 
   selectElement: (id) => set({ selectedId: id }),

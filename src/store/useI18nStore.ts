@@ -90,6 +90,8 @@ const translations: Record<Lang, Record<string, string>> = {
     toastReplaced: 'Reemplazado',
     ocrProcessing: 'Procesando OCR',
     ocrStarting: 'Iniciando...',
+    undo: 'Deshacer',
+    redo: 'Rehacer',
   },
   en: {
     open: 'Open',
@@ -178,6 +180,8 @@ const translations: Record<Lang, Record<string, string>> = {
     toastReplaced: 'Replaced',
     ocrProcessing: 'Processing OCR',
     ocrStarting: 'Starting...',
+    undo: 'Undo',
+    redo: 'Redo',
   },
 }
 
